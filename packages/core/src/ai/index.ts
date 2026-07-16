@@ -5,7 +5,13 @@ import { OpenAIProvider } from "./providers/openai.provider";
 
 export * from "./provider.interface";
 export * from "./schemas/content-plan";
-export { CONTENT_PLAN_PROMPT_VERSION } from "./prompts/registry";
+export * from "./schemas/knowledge";
+export * from "./schemas/ideas";
+export {
+  CONTENT_PLAN_PROMPT_VERSION,
+  KNOWLEDGE_PROMPT_VERSION,
+  IDEAS_PROMPT_VERSION,
+} from "./prompts/registry";
 
 /**
  * Resolve the configured AI provider. This factory is the only place that

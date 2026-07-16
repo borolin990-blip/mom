@@ -1,5 +1,6 @@
 import { prisma, type Business } from "@mom/db";
 import type { BusinessContext } from "../ai/provider.interface";
+import type { BusinessKnowledge } from "../ai/schemas/knowledge";
 
 /**
  * Business/tenant resolution.
@@ -36,6 +37,7 @@ export async function getActiveBusiness(): Promise<Business> {
 
 /** Map a persisted Business into the context the AI engine consumes. */
 export function toBusinessContext(business: Business): BusinessContext {
+  const knowledge = (business.knowledge as BusinessKnowledge | null) ?? null;
   return {
     name: business.name,
     industry: business.industry,
@@ -43,5 +45,7 @@ export function toBusinessContext(business: Business): BusinessContext {
     brandTone: business.brandTone,
     goals: business.goals,
     description: business.description,
+    knowledgeSummary: knowledge?.summary ?? null,
+    topics: knowledge?.topics ?? null,
   };
 }

@@ -11,9 +11,17 @@ export * from "./ai";
 // Storage abstraction
 export * from "./storage";
 
+// Scheduling
+export * from "./scheduling/best-time";
+
+// AI marketing manager (proactive suggestions)
+export * from "./marketing/marketing.service";
+
 // Use-case services
 export * from "./services/business.service";
+export * from "./services/knowledge.service";
 export * from "./services/content.service";
 export * from "./services/generation.service";
+export * from "./services/posts.service";
 
-export const CORE_PACKAGE_VERSION = "0.1.0";
+export const CORE_PACKAGE_VERSION = "0.2.0";

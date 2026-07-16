@@ -98,6 +98,20 @@ model Business {
   brandTone      String? // e.g. "professional, warm, trustworthy"
   goals          String[] // ["leads","awareness","sales"]
   description    String?
+
+  // Optional profile sources the owner can paste during onboarding. The AI uses
+  // these (and everything else) to build the Business Knowledge Profile.
+  websiteUrl   String?
+  instagramUrl String?
+  facebookUrl  String?
+  linkedinUrl  String?
+
+  // The living Business Knowledge Profile: the AI's derived understanding
+  // (services, audience, tone, pain points, writing style, CTA style, topics).
+  // Structured JSON so it can grow without a migration each time it learns more.
+  knowledge   Json?
+  onboardedAt DateTime?
+
   workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   contentAssets  ContentAsset[]
   socialAccounts SocialAccount[]
@@ -116,7 +130,9 @@ model ContentAsset {
   id           String             @id @default(cuid())
   businessId   String
   type         AssetType
-  storageKey   String // opaque key in the storage provider (never a hardcoded URL)
+  // Opaque key in the storage provider (never a hardcoded URL). Null for
+  // idea-only posts that have no uploaded media.
+  storageKey   String?
   originalName String?
   mimeType     String?
   sizeBytes    Int?
@@ -135,6 +151,7 @@ model ContentAsset {
 enum AssetType {
   VIDEO
   IMAGE
+  IDEA // a text-only post created from an idea/prompt (no uploaded media)
 }
 
 enum AssetStatus {

@@ -1,4 +1,9 @@
-import type { GenerateContentPlanInput } from "../provider.interface";
+import type {
+  BuildKnowledgeInput,
+  BusinessContext,
+  ContentIdeasInput,
+  GenerateContentPlanInput,
+} from "../provider.interface";
 import { PLATFORMS } from "../schemas/content-plan";
 
 /**
@@ -10,14 +15,15 @@ import { PLATFORMS } from "../schemas/content-plan";
  * us auditability of how any piece of content was produced.
  */
 export const CONTENT_PLAN_PROMPT_VERSION = "content-plan/v1";
+export const KNOWLEDGE_PROMPT_VERSION = "business-knowledge/v1";
+export const IDEAS_PROMPT_VERSION = "content-ideas/v1";
 
 interface ChatMessages {
   system: string;
   user: string;
 }
 
-function describeBusiness(input: GenerateContentPlanInput): string {
-  const { business } = input;
+function describeBusiness(business: BusinessContext): string {
   const lines = [
     `Business name: ${business.name}`,
     `Industry: ${business.industry}`,
@@ -25,6 +31,12 @@ function describeBusiness(input: GenerateContentPlanInput): string {
     business.brandTone ? `Brand tone: ${business.brandTone}` : null,
     business.goals.length ? `Primary goals: ${business.goals.join(", ")}` : null,
     business.description ? `About: ${business.description}` : null,
+    business.knowledgeSummary
+      ? `What the assistant has learned: ${business.knowledgeSummary}`
+      : null,
+    business.topics?.length
+      ? `Recurring topics: ${business.topics.join(", ")}`
+      : null,
   ].filter(Boolean);
   return lines.join("\n");
 }
@@ -82,12 +94,97 @@ export function buildContentPlanMessages(
 
   const user = [
     "BUSINESS CONTEXT",
-    describeBusiness(input),
+    describeBusiness(input.business),
     "",
     "CONTENT TO WORK WITH",
     describeAsset(input),
     "",
     `Produce the content plan now with ${variationCount} alternative variations.`,
+  ].join("\n");
+
+  return { system, user };
+}
+
+/** Prompt for building the Business Knowledge Profile from onboarding answers. */
+export function buildKnowledgeMessages(
+  input: BuildKnowledgeInput,
+): ChatMessages {
+  const system = [
+    "You are an expert brand strategist. From a few short answers about a",
+    "business, infer a rich, useful profile that will guide all future content.",
+    "Be specific and realistic; never generic. If links are provided, use them",
+    "as strong signal for services, tone, and audience.",
+    "",
+    "Return ONLY a JSON object with EXACTLY this shape:",
+    "{",
+    '  "summary": string,        // one paragraph, in the brand\'s voice',
+    '  "services": string[],',
+    '  "audience": string,',
+    '  "tone": string,',
+    '  "painPoints": string[],   // what the customer struggles with',
+    '  "topics": string[],       // recurring things to post about',
+    '  "writingStyle": string,',
+    '  "ctaStyle": string',
+    "}",
+    "No markdown, no code fences, JSON only.",
+  ].join("\n");
+
+  const links = input.links ?? {};
+  const user = [
+    `Business name: ${input.name}`,
+    `What the business does: ${input.whatWeDo}`,
+    input.idealCustomer ? `Ideal customer: ${input.idealCustomer}` : null,
+    input.goal ? `Main goal: ${input.goal}` : null,
+    links.website ? `Website: ${links.website}` : null,
+    links.instagram ? `Instagram: ${links.instagram}` : null,
+    links.facebook ? `Facebook: ${links.facebook}` : null,
+    links.linkedin ? `LinkedIn: ${links.linkedin}` : null,
+    "",
+    "Build the knowledge profile now.",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  return { system, user };
+}
+
+/** Prompt for proactively proposing content ideas. */
+export function buildContentIdeasMessages(
+  input: ContentIdeasInput,
+): ChatMessages {
+  const count = input.count ?? 5;
+  const system = [
+    "You are a proactive social media marketing manager for a small business.",
+    "Propose fresh, specific content ideas that will help win more leads.",
+    "Vary the formats (short video, carousel, personal story, quick tip, myth-buster).",
+    "Ground every idea in the business and its audience — never generic filler.",
+    "",
+    `Return ONLY a JSON array of exactly ${count} items, each:`,
+    "{",
+    '  "title": string,   // short, punchy',
+    '  "angle": string,   // the approach in one sentence',
+    '  "format": string,  // e.g. "Short video", "Carousel", "Personal story"',
+    '  "why": string      // why it is worth posting now',
+    "}",
+    "No markdown, no code fences, JSON array only.",
+  ].join("\n");
+
+  const knowledge = input.knowledge
+    ? [
+        "",
+        "KNOWLEDGE PROFILE",
+        `Summary: ${input.knowledge.summary}`,
+        `Pain points: ${input.knowledge.painPoints.join(", ")}`,
+        `Topics: ${input.knowledge.topics.join(", ")}`,
+      ].join("\n")
+    : "";
+
+  const user = [
+    "BUSINESS CONTEXT",
+    describeBusiness(input.business),
+    knowledge,
+    "",
+    `Propose ${count} content ideas now.`,
   ].join("\n");
 
   return { system, user };

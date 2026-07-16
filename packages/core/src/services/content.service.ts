@@ -47,7 +47,30 @@ export async function createAsset(
   });
 }
 
-export function getAssetPublicUrl(env: Env, storageKey: string): string {
+/** Create an idea-only post (no uploaded media) from a text prompt. */
+export async function createIdeaAsset(
+  businessId: string,
+  idea: string,
+): Promise<ContentAsset> {
+  const text = idea.trim();
+  const title = text.split(/[—\-–:.\n]/)[0]?.trim().slice(0, 80) || "New idea";
+  return prisma.contentAsset.create({
+    data: {
+      businessId,
+      type: "IDEA",
+      storageKey: null,
+      originalName: title,
+      contextNote: text,
+      status: "UPLOADED",
+    },
+  });
+}
+
+export function getAssetPublicUrl(
+  env: Env,
+  storageKey: string | null,
+): string | null {
+  if (!storageKey) return null;
   return getStorageProvider(env).getPublicUrl(storageKey);
 }
 

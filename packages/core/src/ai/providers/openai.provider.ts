@@ -1,12 +1,23 @@
 import type {
   AIProvider,
+  BuildKnowledgeInput,
+  ContentIdeasInput,
   GenerateContentPlanInput,
 } from "../provider.interface";
-import { buildContentPlanMessages } from "../prompts/registry";
+import {
+  buildContentIdeasMessages,
+  buildContentPlanMessages,
+  buildKnowledgeMessages,
+} from "../prompts/registry";
 import {
   type ContentPlan,
   contentPlanSchema,
 } from "../schemas/content-plan";
+import {
+  type BusinessKnowledge,
+  businessKnowledgeSchema,
+} from "../schemas/knowledge";
+import { type ContentIdea, contentIdeasSchema } from "../schemas/ideas";
 
 /**
  * OpenAI-backed provider. Implemented with plain `fetch` to avoid a heavy SDK
@@ -35,7 +46,36 @@ export class OpenAIProvider implements AIProvider {
     input: GenerateContentPlanInput,
   ): Promise<ContentPlan> {
     const { system, user } = buildContentPlanMessages(input);
+    const parsed = await this.complete(system, user);
+    return contentPlanSchema.parse(parsed);
+  }
 
+  async generateBusinessKnowledge(
+    input: BuildKnowledgeInput,
+  ): Promise<BusinessKnowledge> {
+    const { system, user } = buildKnowledgeMessages(input);
+    const parsed = await this.complete(system, user);
+    return businessKnowledgeSchema.parse(parsed);
+  }
+
+  async generateContentIdeas(
+    input: ContentIdeasInput,
+  ): Promise<ContentIdea[]> {
+    const { system, user } = buildContentIdeasMessages(input);
+    // Ask for an object wrapper so json_object mode is satisfied, then unwrap.
+    const parsed = await this.complete(
+      system,
+      `${user}\n\nReturn the array under an "ideas" key: { "ideas": [...] }.`,
+    );
+    const arr =
+      parsed && typeof parsed === "object" && "ideas" in parsed
+        ? (parsed as { ideas: unknown }).ideas
+        : parsed;
+    return contentIdeasSchema.parse(arr);
+  }
+
+  /** Single place that talks to the API; returns parsed JSON. */
+  private async complete(system: string, user: string): Promise<unknown> {
     const res = await fetch(`${this.baseUrl}/chat/completions`, {
       method: "POST",
       headers: {
@@ -64,18 +104,12 @@ export class OpenAIProvider implements AIProvider {
       choices?: { message?: { content?: string } }[];
     };
     const content = json.choices?.[0]?.message?.content;
-    if (!content) {
-      throw new Error("OpenAI response contained no content.");
-    }
+    if (!content) throw new Error("OpenAI response contained no content.");
 
-    let parsed: unknown;
     try {
-      parsed = JSON.parse(content);
+      return JSON.parse(content);
     } catch {
       throw new Error("OpenAI returned invalid JSON.");
     }
-
-    // Trust nothing until it matches the contract.
-    return contentPlanSchema.parse(parsed);
   }
 }

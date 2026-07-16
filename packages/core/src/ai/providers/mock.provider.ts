@@ -1,7 +1,9 @@
 import type {
   AIProvider,
-  GenerateContentPlanInput,
+  BuildKnowledgeInput,
   BusinessContext,
+  ContentIdeasInput,
+  GenerateContentPlanInput,
 } from "../provider.interface";
 import {
   type ContentPlan,
@@ -9,6 +11,11 @@ import {
   type PlatformHint,
   contentPlanSchema,
 } from "../schemas/content-plan";
+import {
+  type BusinessKnowledge,
+  businessKnowledgeSchema,
+} from "../schemas/knowledge";
+import { type ContentIdea, contentIdeasSchema } from "../schemas/ideas";
 
 /**
  * Deterministic, dependency-free AI provider.
@@ -62,6 +69,89 @@ export class MockAIProvider implements AIProvider {
     // Validate our own output against the shared contract, exactly like a real
     // provider would — so a bug here surfaces the same way as a bad model reply.
     return contentPlanSchema.parse(plan);
+  }
+
+  async generateBusinessKnowledge(
+    input: BuildKnowledgeInput,
+  ): Promise<BusinessKnowledge> {
+    const audience = input.idealCustomer?.trim() || "local customers";
+    const goal = (input.goal ?? "leads").toLowerCase();
+    const doing = input.whatWeDo.trim();
+
+    const knowledge: BusinessKnowledge = {
+      summary: `${input.name} serves ${audience.toLowerCase()}. ${sentenceCase(doing)}. The focus is ${goalTheme(goal)}, communicated with clarity and warmth.`,
+      services: splitToList(doing),
+      audience,
+      tone: "professional, warm, and trustworthy",
+      painPoints: [
+        `Feeling overwhelmed by ${topicFromDoing(doing)}`,
+        "Not knowing where to start",
+        "Worrying about making an expensive mistake",
+      ],
+      topics: [
+        topicFromDoing(doing),
+        "common questions",
+        "myths and mistakes to avoid",
+        "client success stories",
+      ],
+      writingStyle: "clear, jargon-free sentences with a confident, friendly tone",
+      ctaStyle:
+        goal === "sales"
+          ? "invite them to book a consultation"
+          : goal === "awareness"
+            ? "invite them to follow for more tips"
+            : "invite them to reach out for a free personalized plan",
+    };
+
+    return businessKnowledgeSchema.parse(knowledge);
+  }
+
+  async generateContentIdeas(
+    input: ContentIdeasInput,
+  ): Promise<ContentIdea[]> {
+    const count = Math.max(1, input.count ?? 5);
+    const topic =
+      input.knowledge?.topics[0] ??
+      input.business.industry.replace(/_/g, " ");
+    const audience =
+      input.knowledge?.audience ??
+      input.business.targetAudience ??
+      "your audience";
+
+    const seeds: ContentIdea[] = [
+      {
+        title: `3 things to know about ${topic}`,
+        angle: `A quick, reassuring explainer for ${audience.toLowerCase()}.`,
+        format: "Short video",
+        why: "Educational posts build trust and tend to attract new leads.",
+      },
+      {
+        title: "Behind the scenes of a real client win",
+        angle: "Tell a short, human story of a recent success.",
+        format: "Personal story",
+        why: "Story posts create connection — you should share one this week.",
+      },
+      {
+        title: `The biggest myth about ${topic}`,
+        angle: "Bust a common misconception your customers believe.",
+        format: "Carousel",
+        why: "Myth-busting carousels get strong saves and shares.",
+      },
+      {
+        title: "Answering the question I get most",
+        angle: `Address the #1 thing ${audience.toLowerCase()} ask about.`,
+        format: "Quick tip",
+        why: "Answering real questions positions you as the go-to expert.",
+      },
+      {
+        title: "A day in the life",
+        angle: "Show how you help people, simply and authentically.",
+        format: "Short video",
+        why: "Face-to-camera content boosts reach and familiarity.",
+      },
+    ];
+
+    return contentIdeasSchema.parse(loop(seeds, count));
   }
 }
 
@@ -187,7 +277,7 @@ function deriveTopic(
 }
 
 function pickPlatform(
-  assetType: "VIDEO" | "IMAGE",
+  assetType: "VIDEO" | "IMAGE" | "IDEA",
   industry: string,
 ): PlatformHint {
   const professional = /mortgage|law|legal|doctor|medical|finance|consult/i.test(
@@ -195,6 +285,51 @@ function pickPlatform(
   );
   if (assetType === "VIDEO") return professional ? "LINKEDIN" : "TIKTOK";
   return professional ? "LINKEDIN" : "INSTAGRAM";
+}
+
+// -- knowledge/idea helpers ------------------------------------------------
+
+function sentenceCase(s: string): string {
+  const t = s.trim().replace(/[.\s]+$/, "");
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+function goalTheme(goal: string): string {
+  if (goal.includes("sale")) return "turning interest into booked clients";
+  if (goal.includes("aware")) return "growing a recognizable, trusted presence";
+  return "generating qualified leads";
+}
+
+function splitToList(doing: string): string[] {
+  const parts = doing
+    .split(/,| and | & |\/|;/i)
+    .map((s) => s.trim())
+    .filter((s) => s.length > 2);
+  return parts.length ? parts.slice(0, 5) : [doing.trim()];
+}
+
+function topicFromDoing(doing: string): string {
+  let t = doing.trim().toLowerCase();
+  // Drop a leading "I/we help <audience> get/with…" preamble so the topic reads
+  // as a noun phrase ("mortgages") rather than a full sentence.
+  t = t.replace(
+    /^(i|we|our team|my business)\s+(help|assist|serve|work with|support)\s+[a-z\s-]+?\b(get|with|to|by|navigate|find|buy|sell|understand|manage|grow)\b/,
+    "",
+  );
+  t = t.replace(
+    /^(i|we)\s+(offer|provide|do|run|specialize in|specialise in)\s+/,
+    "",
+  );
+  t = t.replace(/^(their|the|a|an)\s+/, "").trim();
+  const clause = t.split(/[.!?\n]|,| and /)[0]?.trim();
+  return clause && clause.length > 2 ? clause : doing.trim().toLowerCase();
+}
+
+function loop<T>(items: T[], count: number): T[] {
+  if (items.length === 0) return items;
+  const out: T[] = [];
+  for (let i = 0; i < count; i++) out.push(items[i % items.length]!);
+  return out;
 }
 
 function buildHashtags(business: BusinessContext, topic: string): string[] {
