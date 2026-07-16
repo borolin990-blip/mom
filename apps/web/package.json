@@ -2,8 +2,27 @@
   "name": "@mom/web",
   "version": "0.1.0",
   "private": true,
-  "description": "Next.js UI + thin API layer. Scaffolded in Phase 1.2 — placeholder in Phase 0.",
+  "description": "Next.js UI + thin API layer for the AI Content OS.",
   "scripts": {
-    "typecheck": "echo \"@mom/web scaffolded in Phase 1.2\""
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@mom/config": "*",
+    "@mom/core": "*",
+    "@mom/db": "*",
+    "next": "^15.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "^20.19.43",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.6.2"
   }
 }

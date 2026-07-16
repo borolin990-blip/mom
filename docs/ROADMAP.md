@@ -9,20 +9,28 @@
 - [x] Initial multi-tenant database schema
 - [x] Project documentation (README, ARCHITECTURE, ROADMAP)
 
-## Phase 1 — Core AI Content Engine (next)
+## Phase 1 — Core AI Content Engine
 
 The heart of the product: **upload once → get a complete AI content plan.**
+Prioritized to prove core product value before auth (owner's decision).
 
-- **1.2** Design-system UI primitives + authenticated app shell
-- **1.3** Auth (email/password + OAuth-ready) → workspace creation
-- **1.4** Business profile onboarding wizard (industry, audience, tone, goals)
-- **1.5** Storage abstraction + uploads + content library
-- **1.6** AI engine: `AIProvider` interface, `mock` + `openai`, prompt
-  registry, Zod schemas, generators
-- **1.7** Generation UI: hook / caption / description / CTA / hashtags /
-  category / suggested platform + alternative versions; edit & regenerate
-- **1.8** Content calendar + heuristic best-time scheduling
-- **1.9** Dashboard (upcoming posts, generations, performance placeholder)
+Built in this milestone:
+
+- [x] Design-system UI primitives + application shell (sidebar/topbar)
+- [x] Storage abstraction (`local` working, `r2` prepared) + upload experience
+- [x] AI engine: `AIProvider` interface, `mock` + `openai` providers, versioned
+  prompt registry, Zod-validated output schemas
+- [x] AI generation workflow: analysis + hook / caption / description / CTA /
+  hashtags / category / suggested platform + alternative variations
+- [x] Content review screen (variation switcher, copy, regenerate)
+- [x] Basic dashboard (content overview + performance placeholder)
+- [x] Simple "active business" auth placeholder (single seam for real auth)
+
+Deferred within Phase 1 (next up):
+
+- [ ] Real auth (email/password + OAuth) → replaces the active-business seam
+- [ ] Business profile onboarding wizard (currently seeded/bootstrapped)
+- [ ] Content calendar + heuristic best-time scheduling
 
 **No social API publishing in Phase 1** — the architecture supports it, but it
 is not built yet.
