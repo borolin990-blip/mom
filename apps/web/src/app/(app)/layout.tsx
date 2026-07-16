@@ -1,4 +1,5 @@
-import { getActiveBusiness } from "@mom/core";
+import { redirect } from "next/navigation";
+import { getActiveBusiness, isOnboarded } from "@mom/core";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Topbar } from "@/components/layout/Topbar";
 
@@ -17,6 +18,9 @@ export default async function AppLayout({
   children: React.ReactNode;
 }) {
   const business = await getActiveBusiness();
+
+  // First-run: send new businesses through the (near-invisible) onboarding.
+  if (!isOnboarded(business)) redirect("/onboarding");
 
   return (
     <div className="flex min-h-screen">

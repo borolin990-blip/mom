@@ -6,14 +6,17 @@ import {
   getAsset,
   getAssetPublicUrl,
   getGenerations,
+  getPostForAsset,
+  recommendPostTime,
 } from "@mom/core";
-import { Card } from "@/components/ui";
 import {
   ReviewScreen,
   type AnalysisVM,
   type ReviewData,
   type VariationVM,
 } from "@/components/generation/ReviewScreen";
+
+export const dynamic = "force-dynamic";
 
 export default async function AssetReviewPage({
   params,
@@ -27,8 +30,10 @@ export default async function AssetReviewPage({
   const asset = await getAsset(assetId, business.id);
   if (!asset) notFound();
 
-  const generations = await getGenerations(asset.id);
-  const previewUrl = getAssetPublicUrl(env, asset.storageKey);
+  const [generations, scheduledPost] = await Promise.all([
+    getGenerations(asset.id),
+    getPostForAsset(asset.id),
+  ]);
 
   const variations: VariationVM[] = generations.map((g) => ({
     id: g.id,
@@ -41,59 +46,39 @@ export default async function AssetReviewPage({
   }));
 
   const primary = generations.find((g) => g.isPrimary) ?? generations[0];
-  const analysis = (asset.analysis as AnalysisVM | null) ?? null;
+  const recommended = recommendPostTime();
 
   const data: ReviewData = {
     assetId: asset.id,
+    businessName: business.name,
+    mediaUrl: getAssetPublicUrl(env, asset.storageKey),
+    mediaType: asset.type,
     category: primary?.category ?? null,
     platformHint: primary?.platformHint ?? null,
-    analysis,
+    analysis: (asset.analysis as AnalysisVM | null) ?? null,
     variations,
+    recommendedAtISO: recommended.at.toISOString(),
+    recommendedLabel: recommended.label,
+    scheduledAtISO: scheduledPost?.scheduledFor?.toISOString() ?? null,
   };
 
   return (
     <div>
       <Link
-        href="/content"
+        href="/create"
         className="text-sm font-medium text-[--color-muted] hover:text-[--color-ink]"
       >
-        ← Back to content
+        ← Back to Create
       </Link>
-
-      <div className="mt-4 grid gap-6 lg:grid-cols-[320px_1fr]">
-        {/* Preview + context */}
-        <div className="space-y-4">
-          <Card className="overflow-hidden">
-            <div className="aspect-square w-full bg-[--color-canvas]">
-              {asset.type === "IMAGE" ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={previewUrl}
-                  alt={asset.originalName ?? "content"}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <video
-                  src={previewUrl}
-                  controls
-                  className="h-full w-full object-contain"
-                />
-              )}
-            </div>
-            <div className="p-4">
-              <div className="truncate text-sm font-medium">
-                {asset.originalName ?? "Untitled"}
-              </div>
-              {asset.contextNote && (
-                <p className="mt-1 text-xs text-[--color-muted]">
-                  “{asset.contextNote}”
-                </p>
-              )}
-            </div>
-          </Card>
-        </div>
-
-        {/* Generation / review */}
+      <h1 className="mb-1 mt-3 text-2xl font-semibold tracking-tight">
+        {asset.type === "IDEA" ? "Your post" : asset.originalName ?? "Your post"}
+      </h1>
+      {asset.contextNote && (
+        <p className="mb-6 text-sm text-[--color-muted]">
+          “{asset.contextNote}”
+        </p>
+      )}
+      <div className="mt-4">
         <ReviewScreen data={data} />
       </div>
     </div>

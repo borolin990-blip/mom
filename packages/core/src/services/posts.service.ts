@@ -39,6 +39,14 @@ export async function schedulePost(params: {
   });
 }
 
+/** The most recent scheduled/published post for an asset, if any. */
+export async function getPostForAsset(assetId: string): Promise<Post | null> {
+  return prisma.post.findFirst({
+    where: { assetId },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
 export async function listPosts(businessId: string): Promise<Post[]> {
   return prisma.post.findMany({
     where: { businessId },

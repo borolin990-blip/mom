@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/components/ui";
 
 const NAV = [
-  { href: "/dashboard", label: "Dashboard", icon: "◧" },
-  { href: "/content", label: "Content", icon: "✦" },
-  { href: "/calendar", label: "Calendar", icon: "▦", soon: true },
+  { href: "/create", label: "Create", icon: "✦" },
+  { href: "/posts", label: "Posts", icon: "▤" },
+  { href: "/business", label: "Business", icon: "◈" },
 ];
 
 export function Sidebar() {
@@ -29,23 +29,16 @@ export function Sidebar() {
           return (
             <Link
               key={item.href}
-              href={item.soon ? "#" : item.href}
-              aria-disabled={item.soon}
+              href={item.href}
               className={cn(
-                "flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition",
+                "flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium transition",
                 active
                   ? "bg-[--color-brand-50] text-[--color-brand-700]"
                   : "text-[--color-muted] hover:bg-[--color-canvas] hover:text-[--color-ink]",
-                item.soon && "pointer-events-none opacity-50",
               )}
             >
-              <span className="flex items-center gap-2.5">
-                <span className="text-xs">{item.icon}</span>
-                {item.label}
-              </span>
-              {item.soon && (
-                <span className="text-[10px] uppercase tracking-wide">soon</span>
-              )}
+              <span className="text-xs">{item.icon}</span>
+              {item.label}
             </Link>
           );
         })}

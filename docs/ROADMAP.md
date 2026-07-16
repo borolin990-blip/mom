@@ -22,18 +22,37 @@ Built in this milestone:
   prompt registry, Zod-validated output schemas
 - [x] AI generation workflow: analysis + hook / caption / description / CTA /
   hashtags / category / suggested platform + alternative variations
-- [x] Content review screen (variation switcher, copy, regenerate)
-- [x] Basic dashboard (content overview + performance placeholder)
 - [x] Simple "active business" auth placeholder (single seam for real auth)
+
+### Phase 1 UX redesign + AI Marketing Manager
+
+The product was reshaped from a tool into a proactive assistant:
+
+- [x] **Create-first** app structure: **Create · Posts · Business** (the
+  vanity dashboard was removed; the app opens on "what would you like to
+  create today?")
+- [x] **Invisible onboarding** → **Business Knowledge Profile**: three questions
+  + optional website/social links, from which the AI derives services,
+  audience, tone, pain points, writing style, CTA style, and topics
+- [x] **AI Suggestions** (the Marketing Manager): proactive recommendations from
+  real signals (posting cadence, content mix, format, best time) plus fresh
+  AI-generated content ideas — "here's what I think you should create today"
+- [x] **Multi-modal Create**: upload media **or** write an idea (idea-only posts)
+- [x] **Redesigned result screen**: per-platform previews, per-field + full-post
+  copy, AI-recommended schedule + Add to calendar, "Ready to post" status, and
+  Publish/Connect controls shown as *Coming soon*
+- [x] **Posts**: list + month calendar of ready/scheduled content
+- [x] **Business**: Knowledge Profile, connected-account placeholders, branding
+  and billing (Coming soon)
 
 Deferred within Phase 1 (next up):
 
 - [ ] Real auth (email/password + OAuth) → replaces the active-business seam
-- [ ] Business profile onboarding wizard (currently seeded/bootstrapped)
-- [ ] Content calendar + heuristic best-time scheduling
+- [ ] Live website/social scraping to enrich the Knowledge Profile (currently
+  inferred from the onboarding answers)
 
-**No social API publishing in Phase 1** — the architecture supports it, but it
-is not built yet.
+**No social API publishing in Phase 1** — the UI is designed as if it's one tap
+away, but the integrations land in Phase 2.
 
 ## Phase 2 — Distribution & Learning
 
