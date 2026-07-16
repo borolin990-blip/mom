@@ -1,0 +1,21 @@
+{
+  "name": "mom",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI Content Operating System for small business owners",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "db:generate": "npm run generate -w @mom/db",
+    "db:migrate": "npm run migrate -w @mom/db",
+    "db:seed": "npm run seed -w @mom/db",
+    "db:studio": "npm run studio -w @mom/db",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "clean": "rm -rf node_modules packages/*/node_modules apps/*/node_modules"
+  }
+}

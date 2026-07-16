@@ -1,0 +1,9 @@
+{
+  "name": "@mom/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Next.js UI + thin API layer. Scaffolded in Phase 1.2 — placeholder in Phase 0.",
+  "scripts": {
+    "typecheck": "echo \"@mom/web scaffolded in Phase 1.2\""
+  }
+}

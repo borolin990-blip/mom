@@ -1,0 +1,238 @@
+// mom — AI Content Operating System
+// Initial database schema (Phase 0)
+//
+// Design principles:
+//  - Multi-tenant from row one: Workspace is the tenant/billing boundary.
+//  - A Workspace has many Members (users w/ roles) and many Businesses
+//    (supports agencies managing several clients).
+//  - Every content-bearing row is reachable from a Business, so tenant
+//    isolation can be enforced at the query layer.
+//  - Publishing + performance are modeled now but only exercised in Phase 2.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Identity & tenancy
+// ---------------------------------------------------------------------------
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  name         String?
+  passwordHash String? // null when authenticated via OAuth only
+  memberships  Membership[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model Workspace {
+  id           String        @id @default(cuid())
+  name         String
+  slug         String        @unique
+  members      Membership[]
+  businesses   Business[]
+  subscription Subscription?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Membership {
+  id          String    @id @default(cuid())
+  userId      String
+  workspaceId String
+  role        Role      @default(OWNER)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, workspaceId])
+  @@index([workspaceId])
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+// ---------------------------------------------------------------------------
+// Billing (prepared, not enforced in Phase 1)
+// ---------------------------------------------------------------------------
+
+model Subscription {
+  id               String    @id @default(cuid())
+  workspaceId      String    @unique
+  plan             Plan      @default(FREE)
+  status           String    @default("active")
+  currentPeriodEnd DateTime?
+  workspace        Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+enum Plan {
+  FREE
+  STARTER
+  PRO
+  AGENCY
+}
+
+// ---------------------------------------------------------------------------
+// Business profile — feeds every AI prompt
+// ---------------------------------------------------------------------------
+
+model Business {
+  id             String          @id @default(cuid())
+  workspaceId    String
+  name           String
+  industry       String // e.g. "mortgage_consulting"
+  targetAudience String?
+  brandTone      String? // e.g. "professional, warm, trustworthy"
+  goals          String[] // ["leads","awareness","sales"]
+  description    String?
+  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contentAssets  ContentAsset[]
+  socialAccounts SocialAccount[]
+  posts          Post[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([workspaceId])
+}
+
+// ---------------------------------------------------------------------------
+// Content library
+// ---------------------------------------------------------------------------
+
+model ContentAsset {
+  id           String             @id @default(cuid())
+  businessId   String
+  type         AssetType
+  storageKey   String // opaque key in the storage provider (never a hardcoded URL)
+  originalName String?
+  mimeType     String?
+  sizeBytes    Int?
+  contextNote  String? // optional user-supplied context about the content
+  status       AssetStatus        @default(UPLOADED)
+  analysis     Json? // AI content-analysis result
+  business     Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  generations  GeneratedContent[]
+  posts        Post[]
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([businessId])
+}
+
+enum AssetType {
+  VIDEO
+  IMAGE
+}
+
+enum AssetStatus {
+  UPLOADED
+  ANALYZING
+  ANALYZED
+  GENERATED
+  FAILED
+}
+
+// ---------------------------------------------------------------------------
+// AI-generated content (versioned; supports primary + alternatives)
+// ---------------------------------------------------------------------------
+
+model GeneratedContent {
+  id           String       @id @default(cuid())
+  assetId      String
+  version      Int          @default(1)
+  isPrimary    Boolean      @default(true)
+  hook         String?
+  caption      String?
+  description  String?
+  cta          String?
+  hashtags     String[]
+  category     String? // AI-inferred content category
+  platformHint String? // suggested posting platform
+  model        String? // which AI model produced this (auditability)
+  raw          Json? // full structured AI output
+  asset        ContentAsset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  createdAt    DateTime     @default(now())
+
+  @@index([assetId])
+}
+
+// ---------------------------------------------------------------------------
+// Publishing (modeled now; integrations land in Phase 2)
+// ---------------------------------------------------------------------------
+
+model SocialAccount {
+  id         String   @id @default(cuid())
+  businessId String
+  platform   Platform
+  handle     String?
+  // OAuth tokens (encrypted) added when integrations land in Phase 2
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([businessId, platform])
+}
+
+enum Platform {
+  FACEBOOK
+  INSTAGRAM
+  TIKTOK
+  LINKEDIN
+  YOUTUBE
+}
+
+model Post {
+  id           String        @id @default(cuid())
+  businessId   String
+  assetId      String?
+  generationId String?
+  platform     Platform
+  status       PostStatus    @default(DRAFT)
+  scheduledFor DateTime?
+  publishedAt  DateTime?
+  caption      String? // resolved final copy
+  business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  asset        ContentAsset? @relation(fields: [assetId], references: [id])
+  metrics      PostMetric[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([businessId, scheduledFor])
+}
+
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+}
+
+// ---------------------------------------------------------------------------
+// Performance (placeholder in Phase 1; learning loop in Phase 2)
+// ---------------------------------------------------------------------------
+
+model PostMetric {
+  id          String   @id @default(cuid())
+  postId      String
+  capturedAt  DateTime @default(now())
+  impressions Int?
+  likes       Int?
+  comments    Int?
+  shares      Int?
+  post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+}
