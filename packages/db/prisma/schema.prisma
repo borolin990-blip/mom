@@ -93,7 +93,10 @@ model Business {
   id             String          @id @default(cuid())
   workspaceId    String
   name           String
-  industry       String // e.g. "mortgage_consulting"
+  industry       String // e.g. "mortgage_consulting" (human-readable)
+  // Binds the business to a Vertical module (all niche logic). "generic" is the
+  // vertical-agnostic fallback; "mortgage" is the primary vertical.
+  verticalKey    String  @default("generic")
   targetAudience String?
   brandTone      String? // e.g. "professional, warm, trustworthy"
   goals          String[] // ["leads","awareness","sales"]

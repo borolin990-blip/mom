@@ -7,6 +7,7 @@ import {
 import type { Env } from "@mom/config";
 import { getAIProvider, type ContentPlan, type ContentVariation } from "../ai";
 import { toBusinessContext } from "./business.service";
+import { resolveVerticalForBusiness } from "../verticals/registry";
 
 /**
  * The core product workflow: turn an uploaded asset + business profile into a
@@ -38,6 +39,7 @@ export async function generateForAsset(
   if (!asset) throw new Error("Asset not found.");
 
   const provider = getAIProvider(env);
+  const vertical = resolveVerticalForBusiness(asset.business);
 
   await prisma.contentAsset.update({
     where: { id: asset.id },
@@ -54,6 +56,8 @@ export async function generateForAsset(
         contextNote: asset.contextNote,
       },
       variationCount: 2,
+      persona: vertical.contentPersona,
+      guidance: vertical.contentGuidance,
     });
   } catch (err) {
     await prisma.contentAsset.update({

@@ -11,6 +11,9 @@ export * from "./ai";
 // Storage abstraction
 export * from "./storage";
 
+// Verticals (the "architect horizontally" seam)
+export * from "./verticals/registry";
+
 // Scheduling
 export * from "./scheduling/best-time";
 

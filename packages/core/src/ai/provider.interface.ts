@@ -39,6 +39,12 @@ export interface GenerateContentPlanInput {
   asset: AssetContext;
   /** How many alternative variations to produce (in addition to primary). */
   variationCount?: number;
+  /**
+   * Vertical persona + guardrails, injected by the resolved Vertical module so
+   * the same generic engine writes mortgage-grade (or any-vertical) content.
+   */
+  persona?: string;
+  guidance?: string;
 }
 
 /** Inputs for building the Business Knowledge Profile during onboarding. */

@@ -4,6 +4,7 @@ import { getAIProvider } from "../ai";
 import { getKnowledge } from "../services/knowledge.service";
 import { toBusinessContext } from "../services/business.service";
 import { recommendPostTime } from "../scheduling/best-time";
+import { resolveVerticalForBusiness } from "../verticals/registry";
 import type { Suggestion } from "./suggestion.types";
 
 export * from "./suggestion.types";
@@ -33,6 +34,18 @@ export async function getSuggestions(
   ]);
 
   const suggestions: Suggestion[] = [];
+
+  // 0. Vertical-specific proactive suggestions (e.g. rate-drop → refi post).
+  //    These lead the feed because they're the most timely/valuable. Built out
+  //    inside the vertical module as its data sources come online.
+  const vertical = resolveVerticalForBusiness(business);
+  if (vertical.contributeSuggestions) {
+    try {
+      suggestions.push(...(await vertical.contributeSuggestions({ env, business })));
+    } catch {
+      // A vertical hiccup must never break the core feed.
+    }
+  }
 
   // 1. Cadence / welcome — grounded in real activity.
   if (assetCount === 0) {

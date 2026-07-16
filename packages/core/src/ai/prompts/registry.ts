@@ -63,11 +63,17 @@ export function buildContentPlanMessages(
 ): ChatMessages {
   const variationCount = input.variationCount ?? 2;
 
+  const persona =
+    input.persona ??
+    "an expert social media marketing strategist for small businesses";
+  const guidance =
+    input.guidance ??
+    "Write copy that is specific, credible, and human — never generic or spammy. Adapt tone and vocabulary to the business's industry and audience.";
+
   const system = [
-    "You are an expert social media marketing strategist for small businesses.",
+    `You are ${persona}.`,
     "Your single objective: help the business owner get more leads with less effort.",
-    "You write copy that is specific, credible, and human — never generic or spammy.",
-    "You adapt tone and vocabulary to the business's industry and audience.",
+    guidance,
     "",
     "Return ONLY a JSON object with EXACTLY this shape:",
     "{",
