@@ -1,9 +1,9 @@
-<title>לומה — נוכחות, לא לוח בקרה</title>
+<title>לומה — העבודה שלך להיום, מוכנה</title>
 <style>
   :root{
     --ink:#0A0812;
     --white:#F4EFE6;
-    --muted:#A49DB4;
+    --muted:#A79FB6;
     --faint:#726B85;
     --violet:#7E6CFF;
     --blue:#4C8DFF;
@@ -16,203 +16,198 @@
   *{box-sizing:border-box;}
   html,body{margin:0;}
   .app{
-    position:relative;
-    min-height:100vh;
-    background:
-      radial-gradient(120% 90% at 50% -8%, #241a45 0%, #140f2a 34%, #0b0818 62%, #070510 100%);
-    color:var(--white);
-    font-family:var(--font);
-    overflow-x:hidden;
-    isolation:isolate;
+    position:relative;min-height:100vh;
+    background:radial-gradient(120% 80% at 50% -10%, #1c1638 0%, #120d24 40%, #0a0716 72%, #070510 100%);
+    color:var(--white);font-family:var(--font);overflow-x:hidden;isolation:isolate;
   }
   .app *{font-family:inherit;}
-  /* film grain */
   .app::before{
-    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5;mix-blend-mode:overlay;
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.42;mix-blend-mode:overlay;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
   }
 
-  .stage{
-    position:relative;z-index:2;
-    max-width:600px;margin:0 auto;
-    padding:46px 24px 140px;
-    text-align:center;
-    display:flex;flex-direction:column;align-items:center;
-  }
+  .stage{position:relative;z-index:2;max-width:600px;margin:0 auto;padding:26px 22px 130px;}
 
-  .eyebrow{
-    font-size:.78rem;font-weight:700;letter-spacing:.28em;color:var(--amber);
-    display:flex;align-items:center;gap:10px;text-transform:uppercase;
+  /* presence — the employee beside you, understated */
+  .top{display:flex;align-items:center;gap:12px;margin-bottom:26px;}
+  .presence{
+    width:44px;height:44px;border-radius:50%;flex:none;position:relative;
+    background:radial-gradient(circle at 50% 38%, #ffe6be 0%, #ffb877 20%, #8b78ff 58%, #4c8dff 82%, rgba(76,141,255,0) 100%);
+    box-shadow:0 0 26px -6px rgba(126,108,255,.6);
+    animation:breathe 5.5s ease-in-out infinite;
   }
-  .eyebrow .live{width:6px;height:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 0 rgba(255,192,122,.7);animation:beat 2.6s infinite;}
-  @keyframes beat{0%{box-shadow:0 0 0 0 rgba(255,192,122,.55)}70%{box-shadow:0 0 0 9px rgba(255,192,122,0)}100%{box-shadow:0 0 0 0 rgba(255,192,122,0)}}
+  @keyframes breathe{0%,100%{transform:scale(1);opacity:.94}50%{transform:scale(1.05);opacity:1}}
+  .top .who{display:flex;flex-direction:column;line-height:1.3;}
+  .top .who .nm{font-weight:700;font-size:.98rem;}
+  .top .who .st{font-size:.76rem;color:var(--faint);display:flex;align-items:center;gap:6px;}
+  .top .who .st .d{width:5px;height:5px;border-radius:50%;background:var(--emerald);}
 
-  /* the presence */
-  .orbwrap{position:relative;width:260px;height:260px;margin:26px 0 4px;display:grid;place-items:center;}
-  #orb{width:260px;height:260px;display:block;}
-  .pulsepill{
-    position:absolute;inset-block-end:6px;inset-inline-start:50%;transform:translateX(50%);
-    display:flex;align-items:center;gap:8px;white-space:nowrap;
-    background:rgba(10,8,20,.5);backdrop-filter:blur(8px);
-    border:1px solid var(--glass-line);border-radius:999px;padding:6px 13px;
-    font-size:.78rem;color:var(--muted);
-  }
-  .pulsepill b{color:var(--white);font-weight:700;}
-  .pulsepill .down{color:var(--emerald);font-weight:800;}
-  .spark{display:inline-block;width:44px;height:14px;}
+  .greet{font-size:clamp(1.5rem,4.4vw,2rem);font-weight:800;letter-spacing:-.02em;line-height:1.3;margin:0 0 20px;text-wrap:balance;}
+  .greet .em{color:var(--amber);}
 
-  h1{
-    margin:22px 0 0;font-weight:800;letter-spacing:-.02em;
-    font-size:clamp(2rem,6.4vw,3.35rem);line-height:1.18;text-wrap:balance;
-    color:#fff;
-  }
-  h1 .hl{
-    background:linear-gradient(100deg,var(--amber),#ff9e6b);
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-  }
-  .sub{margin:16px 0 0;font-size:1.12rem;color:var(--muted);line-height:1.6;max-width:34ch;}
-  .sub b{color:var(--white);font-weight:700;}
+  /* what's done — the instant answer, concrete completed facts */
+  .done-list{display:flex;flex-direction:column;gap:10px;margin-bottom:30px;}
+  .done-item{display:flex;align-items:center;gap:11px;font-size:1rem;color:var(--white);}
+  .done-item .ck{width:22px;height:22px;flex:none;border-radius:50%;display:grid;place-items:center;background:rgba(84,214,166,.16);color:var(--emerald);}
+  .done-item .ck svg{width:13px;height:13px;}
+  .done-item b{font-weight:800;}
+  .done-item .muted{color:var(--muted);}
 
-  /* the stack of prepared work */
-  .stack{margin-top:40px;width:100%;display:flex;flex-direction:column;gap:16px;text-align:right;}
-  .work{
+  /* section label */
+  .slabel{font-size:.76rem;font-weight:700;letter-spacing:.14em;color:var(--faint);margin:0 0 12px;}
+
+  /* HERO completed work — the biggest, brightest thing on screen */
+  .hero{
     position:relative;overflow:hidden;
-    background:var(--glass);backdrop-filter:blur(16px);
-    border:1px solid var(--glass-line);border-radius:22px;padding:20px 20px 18px;
-    box-shadow:0 30px 60px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.06);
-    transition:transform .5s cubic-bezier(.2,.7,.2,1), opacity .5s, filter .5s, margin .5s, max-height .5s;
-    max-height:320px;
+    background:linear-gradient(180deg, rgba(255,255,255,.085), rgba(255,255,255,.03));
+    border:1px solid rgba(255,255,255,.16);border-radius:24px;padding:22px;
+    box-shadow:0 40px 80px -34px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.10);
   }
-  .work::before{
-    content:"";position:absolute;inset-block-start:0;inset-inline-end:0;width:40%;height:100%;
-    background:radial-gradient(circle at 100% 0,rgba(126,108,255,.22),transparent 68%);pointer-events:none;
-  }
-  .work.approved{transform:translateX(-40px);opacity:0;filter:blur(3px);max-height:0;margin-top:-16px;padding-block:0;}
-  .work .row{display:flex;align-items:flex-start;gap:14px;position:relative;}
-  .work .glyph{
-    width:44px;height:44px;flex:none;border-radius:13px;display:grid;place-items:center;
-    background:linear-gradient(140deg,rgba(126,108,255,.9),rgba(76,141,255,.75));
-    box-shadow:0 10px 22px -8px rgba(126,108,255,.6);
-  }
-  .work .glyph svg{width:22px;height:22px;color:#fff;}
-  .work h3{margin:0;font-size:1.16rem;font-weight:800;color:#fff;letter-spacing:-.01em;}
-  .work .why{margin:6px 0 0;font-size:.94rem;color:var(--muted);line-height:1.55;}
-  .work .why b{color:#EDE8FF;font-weight:700;}
-  .work .foot{display:flex;align-items:center;gap:12px;margin-top:16px;}
-  .work .meta{font-size:.8rem;color:var(--faint);margin-inline-start:auto;}
+  .hero::before{content:"";position:absolute;inset-block-start:-30%;inset-inline-start:-10%;width:60%;height:80%;
+    background:radial-gradient(circle at 0 0,rgba(126,108,255,.28),transparent 66%);pointer-events:none;}
+  .hero > *{position:relative;}
+  .urgent{display:inline-flex;align-items:center;gap:7px;font-size:.76rem;font-weight:800;color:#ffdca6;
+    background:rgba(255,192,122,.14);border:1px solid rgba(255,192,122,.3);padding:5px 12px;border-radius:999px;margin-bottom:14px;}
+  .urgent .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);}
+  .hero h3{margin:0 0 6px;font-size:1.34rem;font-weight:800;color:#fff;letter-spacing:-.01em;}
+  .hero .count{font-size:.9rem;color:var(--muted);margin-bottom:16px;}
+  .hero .count b{color:#fff;}
 
-  .approve{
-    border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:.98rem;color:#fff;
-    padding:12px 22px;border-radius:13px;
+  /* the actual finished artifact — the message Luma wrote */
+  .note{background:rgba(126,108,255,.1);border:1px solid rgba(126,108,255,.24);border-radius:16px 16px 4px 16px;
+    padding:15px 17px;color:#EFEBFC;font-size:1rem;line-height:1.65;}
+  .note .lbl{font-size:.72rem;font-weight:700;letter-spacing:.06em;color:#b3a9ee;margin-bottom:8px;display:flex;align-items:center;gap:7px;}
+  .note .lbl::before{content:"";width:14px;height:2px;border-radius:2px;background:linear-gradient(90deg,var(--violet),var(--blue));}
+  .note .sig{color:var(--muted);}
+
+  .why{display:flex;align-items:center;gap:9px;font-size:.92rem;color:var(--muted);margin:16px 0 18px;}
+  .why svg{width:16px;height:16px;color:var(--amber);flex:none;}
+  .why b{color:#EDE8FF;font-weight:700;}
+
+  .foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+  .approve{border:0;cursor:pointer;font-family:inherit;font-weight:800;font-size:1rem;color:#fff;padding:13px 22px;border-radius:13px;
     background:linear-gradient(110deg,var(--violet),var(--blue));
-    box-shadow:0 14px 30px -10px rgba(90,120,255,.7), inset 0 1px 0 rgba(255,255,255,.25);
-    display:inline-flex;align-items:center;gap:9px;transition:transform .15s, box-shadow .25s;
-  }
-  .approve:hover{box-shadow:0 18px 40px -10px rgba(90,120,255,.9);}
+    box-shadow:0 16px 34px -12px rgba(90,120,255,.75), inset 0 1px 0 rgba(255,255,255,.25);
+    display:inline-flex;align-items:center;gap:9px;transition:transform .15s, box-shadow .25s;}
+  .approve:hover{box-shadow:0 20px 44px -12px rgba(90,120,255,.95);}
   .approve:active{transform:translateY(1px) scale(.99);}
-  .later{background:none;border:0;color:var(--faint);font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer;padding:10px;}
+  .later{background:none;border:0;color:var(--faint);font-family:inherit;font-size:.92rem;font-weight:600;cursor:pointer;padding:10px;}
   .later:hover{color:var(--muted);}
 
-  .done-all{
-    margin-top:30px;text-align:center;opacity:0;transform:translateY(10px);
-    transition:opacity .6s .1s, transform .6s .1s;pointer-events:none;
-  }
-  .done-all.show{opacity:1;transform:none;}
-  .done-all .big{font-size:1.5rem;font-weight:800;color:#fff;}
-  .done-all .sm{font-size:.98rem;color:var(--muted);margin-top:6px;}
+  /* secondary completed work */
+  .work{margin-top:16px;background:var(--glass);border:1px solid var(--glass-line);border-radius:20px;padding:20px;
+    transition:transform .5s cubic-bezier(.2,.7,.2,1),opacity .5s,filter .5s,max-height .5s,margin .5s,padding .5s;max-height:520px;overflow:hidden;}
+  .work.approved,.hero.approved{transform:translateX(-40px);opacity:0;filter:blur(3px);max-height:0;margin-top:-4px;padding-block:0;border-color:transparent;}
+  .work h3{margin:0 0 4px;font-size:1.16rem;font-weight:800;color:#fff;}
+  .work .count{font-size:.88rem;color:var(--muted);margin-bottom:14px;}
 
-  /* subordinate dock — signals a product without a dashboard */
-  .dock{
-    position:fixed;z-index:5;inset-block-end:20px;inset-inline-start:50%;transform:translateX(50%);
-    display:flex;gap:2px;background:rgba(12,10,24,.6);backdrop-filter:blur(14px);
-    border:1px solid var(--glass-line);border-radius:999px;padding:6px;
-  }
-  .dock a{
-    font-size:.84rem;font-weight:600;color:var(--faint);text-decoration:none;
-    padding:8px 16px;border-radius:999px;transition:color .2s,background .2s;
-  }
+  /* a real post preview so quality is visible */
+  .pv{background:rgba(255,255,255,.05);border:1px solid var(--glass-line);border-radius:14px;padding:13px;margin-bottom:12px;}
+  .pv .pvh{display:flex;align-items:center;gap:9px;margin-bottom:9px;}
+  .pv .pa{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--blue));display:grid;place-items:center;font-size:.68rem;font-weight:800;color:#fff;}
+  .pv .pn{font-size:.82rem;font-weight:700;}
+  .pv .pp{font-size:.72rem;color:var(--faint);margin-inline-start:auto;}
+  .pv .cap{font-size:.92rem;color:#E9E4F4;line-height:1.55;}
+  .pv .tags{font-size:.82rem;color:#9d8dff;margin-top:6px;}
+  .more{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+  .mrow{display:flex;align-items:center;gap:10px;font-size:.92rem;color:var(--white);}
+  .mrow .chip{font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(126,108,255,.16);color:#b8abff;margin-inline-start:auto;}
+  .mrow .b{width:6px;height:6px;border-radius:50%;background:var(--faint);flex:none;}
+
+  .done-all{margin-top:30px;text-align:center;opacity:0;transform:translateY(10px);transition:opacity .6s,transform .6s;pointer-events:none;}
+  .done-all.show{opacity:1;transform:none;}
+  .done-all .big{font-size:1.4rem;font-weight:800;color:#fff;}
+  .done-all .sm{font-size:.96rem;color:var(--muted);margin-top:6px;}
+
+  .dock{position:fixed;z-index:5;inset-block-end:20px;inset-inline-start:50%;transform:translateX(50%);
+    display:flex;gap:2px;background:rgba(12,10,24,.62);backdrop-filter:blur(14px);border:1px solid var(--glass-line);border-radius:999px;padding:6px;}
+  .dock a{font-size:.84rem;font-weight:600;color:var(--faint);text-decoration:none;padding:8px 15px;border-radius:999px;transition:color .2s,background .2s;}
   .dock a.on{color:#fff;background:linear-gradient(110deg,rgba(126,108,255,.4),rgba(76,141,255,.25));}
   .dock a:hover{color:var(--white);}
 
-  .reveal{opacity:0;transform:translateY(18px);animation:rise .9s cubic-bezier(.2,.7,.2,1) forwards;}
+  .reveal{opacity:0;transform:translateY(16px);animation:rise .8s cubic-bezier(.2,.7,.2,1) forwards;}
   @keyframes rise{to{opacity:1;transform:none;}}
 
-  @media (max-width:520px){
-    .stage{padding-top:34px;}
-    .orbwrap,#orb{width:210px;height:210px;}
-    .sub{font-size:1rem;}
-    .work .foot{flex-wrap:wrap;}
-  }
-  @media (prefers-reduced-motion:reduce){
-    .reveal{animation:none;opacity:1;transform:none;}
-    .eyebrow .live{animation:none;}
-  }
+  @media (max-width:520px){.stage{padding-top:20px;} .foot{gap:8px;}}
+  @media (prefers-reduced-motion:reduce){.reveal{animation:none;opacity:1;transform:none;}.presence{animation:none;}}
 </style>
 
 <div class="app" dir="rtl" lang="he">
   <main class="stage">
-    <div class="eyebrow reveal" style="animation-delay:.05s"><span class="live"></span>לומה · עֵרה מ־05:40</div>
 
-    <div class="orbwrap reveal" style="animation-delay:.15s">
-      <canvas id="orb" width="520" height="520" aria-label="נוכחות ה-AI"></canvas>
-      <div class="pulsepill">
-        <svg class="spark" viewBox="0 0 44 14" fill="none" aria-hidden="true">
-          <path d="M1 4 L10 6 L18 3 L26 8 L34 7 L43 11" stroke="#54D6A6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        עוקבת אחר הריבית · <b>מגמת ירידה</b> <span class="down">↓</span>
+    <div class="top reveal" style="animation-delay:.05s">
+      <div class="presence" aria-label="לומה"></div>
+      <div class="who">
+        <span class="nm">לומה</span>
+        <span class="st"><span class="d"></span>עֵרה · סיימה את עבודת הבוקר ב-05:40</span>
       </div>
     </div>
 
-    <h1 class="reveal" style="animation-delay:.3s">בוקר טוב, נועה.<br>הריבית ירדה — <span class="hl">14 לקוחות</span> יכולים לחסוך.</h1>
-    <p class="sub reveal" style="animation-delay:.45s">עבדתי בזמן שישנת. <b>הכנתי הכול.</b> נשאר רק לאשר.</p>
+    <h1 class="greet reveal" style="animation-delay:.12s">בוקר טוב, נועה.<br>הכנתי עבורך <span class="em">שלוש עבודות</span> — נשאר רק לאשר.</h1>
 
-    <section class="stack">
-      <article class="work reveal" style="animation-delay:.6s">
-        <div class="row">
-          <div class="glyph">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M4 12a8 8 0 0 1 8-8M20 12a8 8 0 0 1-8 8"/><path d="M12 4l2 2-2 2M12 20l-2-2 2-2"/></svg>
-          </div>
-          <div>
-            <h3>פנייה ל-14 לקוחות למחזור משכנתא</h3>
-            <p class="why">כתבתי הודעה אישית לכל אחד — בסגנון שלך. <b>לקוחות עבר הם הפניות החמות ביותר.</b></p>
-          </div>
-        </div>
-        <div class="foot">
-          <button class="approve" onclick="approve(this)">אישור ושליחה
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>
-          </button>
-          <button class="later">להצגה קודם</button>
-          <span class="meta">זמן משוער: 40 שניות</span>
-        </div>
-      </article>
+    <div class="done-list reveal" style="animation-delay:.2s">
+      <div class="done-item"><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>14 לקוחות עבר</b> <span class="muted">אותרו כמתאימים למחזור משכנתא</span></span></div>
+      <div class="done-item"><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>הודעות אישיות</b> <span class="muted">נכתבו לכל אחד מהם, בסגנון שלך</span></span></div>
+      <div class="done-item"><span class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></span><span><b>3 פוסטים</b> <span class="muted">נכתבו ותוזמנו לזמנים הטובים ביותר</span></span></div>
+    </div>
 
-      <article class="work reveal" style="animation-delay:.72s">
-        <div class="row">
-          <div class="glyph" style="background:linear-gradient(140deg,rgba(84,214,166,.9),rgba(76,141,255,.7))">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 10h8M8 14h5"/></svg>
-          </div>
-          <div>
-            <h3>3 פוסטים מוכנים לשבוע</h3>
-            <p class="why">תמהיל · מחזור · טעויות של רוכשים ראשונים. <b>מתוזמנים לזמנים הטובים ביותר.</b></p>
-          </div>
-        </div>
-        <div class="foot">
-          <button class="approve" onclick="approve(this)">אישור הפרסום
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>
-          </button>
-          <button class="later">לצפייה</button>
-          <span class="meta">אינסטגרם · פייסבוק</span>
-        </div>
-      </article>
-    </section>
+    <p class="slabel reveal" style="animation-delay:.28s">מה לאשר קודם</p>
+
+    <!-- HERO: the completed work is the star -->
+    <article class="hero reveal" id="hero" style="animation-delay:.34s">
+      <span class="urgent"><span class="dot"></span>הכי משתלם היום</span>
+      <h3>פנייה ל-14 לקוחות שיכולים לחסוך במחזור</h3>
+      <p class="count">הריבית ירדה — <b>14 מלקוחות העבר שלך</b> משלמים היום יותר מהנדרש.</p>
+
+      <div class="note">
+        <div class="lbl">ההודעה שכתבתי לכל לקוח</div>
+        "היי דנה, שמתי לב שהריבית ירדה לאחרונה ובדקתי את התיק שלך — ייתכן שנוכל להוריד לך את ההחזר החודשי. שווה שנעשה בדיקה קצרה, בלי שום התחייבות? <span class="sig">— נועה</span>"
+      </div>
+
+      <div class="why">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6 4.6 2.3 7.4-6.3-4.6L5.7 21 8 14 2 9.4h7.6L12 2Z"/></svg>
+        <span>לקוחות עבר הם <b>הפניות החמות ביותר</b> שיש לך — הם כבר סומכים עלייך.</span>
+      </div>
+
+      <div class="foot">
+        <button class="approve" onclick="approve('hero')">אישור ושליחה ל-14 לקוחות
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>
+        </button>
+        <button class="later">לצפייה ברשימה</button>
+      </div>
+    </article>
+
+    <!-- secondary completed work -->
+    <article class="work reveal" id="posts" style="animation-delay:.46s">
+      <h3>3 פוסטים מוכנים לשבוע</h3>
+      <p class="count">כתובים בסגנון שלך, מתוזמנים ומוכנים לפרסום.</p>
+
+      <div class="pv">
+        <div class="pvh"><span class="pa">נל</span><span class="pn">נועה לוי · ייעוץ משכנתאות</span><span class="pp">אינסטגרם · רביעי 19:00</span></div>
+        <div class="cap">רוב הרוכשים בונים תמהיל משכנתא לא נכון — וזה עולה להם עשרות אלפי שקלים. הנה איך לבנות אותו חכם, בלי להסתבך 👇</div>
+        <div class="tags">#משכנתא #תמהיל #דירה_ראשונה</div>
+      </div>
+
+      <div class="more">
+        <div class="mrow"><span class="b"></span>מתי כדאי למחזר את המשכנתא<span class="chip">מתוזמן · חמישי</span></div>
+        <div class="mrow"><span class="b"></span>5 טעויות של רוכשי דירה ראשונה<span class="chip">מתוזמן · ראשון</span></div>
+      </div>
+
+      <div class="foot">
+        <button class="approve" onclick="approve('posts')">אישור הפרסום
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>
+        </button>
+        <button class="later">לצפייה בכל הפוסטים</button>
+      </div>
+    </article>
 
     <div class="done-all" id="done">
-      <div class="big">זהו להיום. ✦</div>
-      <div class="sm">אני ממשיכה לעקוב אחר השוק ואעדכן אותך אם משהו חשוב יקרה.</div>
+      <div class="big">הכול אושר. יומך השיווקי סודר. ✦</div>
+      <div class="sm">אמשיך לעקוב אחר השוק ואעדכן אותך אם תעלה הזדמנות חדשה.</div>
     </div>
   </main>
 
-  <nav class="dock reveal" style="animation-delay:.9s">
+  <nav class="dock reveal" style="animation-delay:.6s">
     <a class="on" href="#">הבריף</a>
     <a href="#">יצירה</a>
     <a href="#">לוח פרסום</a>
@@ -222,56 +217,15 @@
 
 <script>
 (function(){
-  const canvas=document.getElementById('orb');
-  const ctx=canvas.getContext('2d');
-  const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const DPR=Math.min(2,window.devicePixelRatio||1);
-  const size=520;
-  canvas.width=size*DPR; canvas.height=size*DPR; ctx.scale(DPR,DPR);
-  const cx=size/2, cy=size/2;
-
-  function blob(x,y,r,c0,c1,a){
-    const g=ctx.createRadialGradient(x,y,0,x,y,r);
-    g.addColorStop(0,c0); g.addColorStop(1,c1);
-    ctx.globalAlpha=a; ctx.fillStyle=g;
-    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
-  }
-
-  function frame(t){
-    ctx.clearRect(0,0,size,size);
-    ctx.globalCompositeOperation='lighter';
-    const br=1+Math.sin(t*0.0013)*0.05;           // breathing
-    // outer aura
-    blob(cx,cy,150*br,'rgba(126,108,255,0.55)','rgba(126,108,255,0)',0.9);
-    // drifting aurora blobs
-    const a1=t*0.0006, a2=t*0.0009+2;
-    blob(cx+Math.cos(a1)*34, cy+Math.sin(a1)*30, 110*br,'rgba(76,141,255,0.6)','rgba(76,141,255,0)',0.85);
-    blob(cx+Math.cos(a2)*30, cy+Math.sin(a2)*36, 96*br,'rgba(180,120,255,0.55)','rgba(180,120,255,0)',0.8);
-    // warm human core
-    blob(cx, cy-6, 62*br,'rgba(255,214,150,0.95)','rgba(255,176,110,0)',0.95);
-    blob(cx, cy-6, 26*br,'rgba(255,255,255,0.95)','rgba(255,235,200,0)',0.95);
-    // faint orbiting specks
-    ctx.globalAlpha=0.7;
-    for(let i=0;i<5;i++){
-      const a=t*0.0011+i*1.256, rr=118+Math.sin(t*0.002+i)*10;
-      const x=cx+Math.cos(a)*rr, y=cy+Math.sin(a)*rr;
-      blob(x,y,3.2,'rgba(255,255,255,0.9)','rgba(255,255,255,0)',0.8);
-    }
-    ctx.globalAlpha=1; ctx.globalCompositeOperation='source-over';
-  }
-
-  if(reduce){ frame(1200); }
-  else { let start=null; (function loop(ts){ if(!start)start=ts; frame(ts-start); requestAnimationFrame(loop); })(0); }
-
-  // approving feels alive
-  let remaining=document.querySelectorAll('.work').length;
-  window.approve=function(btn){
-    const card=btn.closest('.work');
+  const presence=document.querySelector('.presence');
+  let remaining=2;
+  window.approve=function(id){
+    const card=document.getElementById(id);
+    if(!card||card.classList.contains('approved'))return;
     card.classList.add('approved');
     remaining--;
-    // brief brighten of the presence
-    canvas.animate([{filter:'brightness(1)'},{filter:'brightness(1.6)'},{filter:'brightness(1)'}],{duration:700,easing:'ease-out'});
-    if(remaining<=0){ setTimeout(()=>document.getElementById('done').classList.add('show'),420); }
+    if(presence)presence.animate([{filter:'brightness(1)'},{filter:'brightness(1.5)'},{filter:'brightness(1)'}],{duration:650,easing:'ease-out'});
+    if(remaining<=0)setTimeout(()=>document.getElementById('done').classList.add('show'),400);
   };
 })();
 </script>
