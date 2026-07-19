@@ -113,12 +113,15 @@ model Business {
   // (services, audience, tone, pain points, writing style, CTA style, topics).
   // Structured JSON so it can grow without a migration each time it learns more.
   knowledge   Json?
+  // Ranked growth goals (the Growth Plan) — shapes every weekly cycle.
+  growthPlan  Json?
   onboardedAt DateTime?
 
   workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   contentAssets  ContentAsset[]
   socialAccounts SocialAccount[]
   posts          Post[]
+  cycles         WeeklyCycle[]
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 
@@ -255,4 +258,80 @@ model PostMetric {
   post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@index([postId])
+}
+
+// ---------------------------------------------------------------------------
+// The Weekly Cycle — the spine of the product (see docs/PRODUCT.md).
+// Generic across verticals; niche content comes from the Vertical module.
+// ---------------------------------------------------------------------------
+
+model WeeklyCycle {
+  id            String      @id @default(cuid())
+  businessId    String
+  weekOf        DateTime // the Sunday this cycle covers
+  status        CycleStatus @default(REVIEW)
+  objectiveGoal String? // the goal key this week serves
+  objectiveNote String? // one line: why this focus
+  // The weekly research/trend read the plan was built on.
+  research      Json?
+  business      Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  items         PlanItem[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([businessId, weekOf])
+}
+
+enum CycleStatus {
+  RESEARCHING
+  REVIEW // awaiting approval
+  SCHEDULED
+  PUBLISHED
+}
+
+model PlanItem {
+  id           String         @id @default(cuid())
+  cycleId      String
+  businessId   String
+  role         PlanItemRole
+  format       PlanFormat
+  platform     Platform
+  topic        String
+  hook         String
+  caption      String
+  description  String?
+  cta          String
+  hashtags     String[]
+  goal         String? // the goal this item serves
+  rationale    String? // why Luma chose it (shown on approval)
+  // For REEL/video items: the generated script (beats, on-screen text, etc.).
+  videoScript  Json?
+  status       PlanItemStatus @default(DRAFT)
+  scheduledFor DateTime?
+  cycle        WeeklyCycle    @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([cycleId])
+  @@index([businessId, scheduledFor])
+}
+
+enum PlanItemRole {
+  EDUCATIONAL
+  AUTHORITY
+  TRUST
+  CONVERSION
+}
+
+enum PlanFormat {
+  REEL
+  CAROUSEL
+  STATIC
+}
+
+enum PlanItemStatus {
+  DRAFT
+  APPROVED
+  SCHEDULED
+  PUBLISHED
 }

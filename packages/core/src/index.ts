@@ -26,5 +26,6 @@ export * from "./services/knowledge.service";
 export * from "./services/content.service";
 export * from "./services/generation.service";
 export * from "./services/posts.service";
+export * from "./services/weekly-cycle.service";
 
 export const CORE_PACKAGE_VERSION = "0.2.0";

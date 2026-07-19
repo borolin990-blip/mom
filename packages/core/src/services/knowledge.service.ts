@@ -1,6 +1,7 @@
 import { prisma, type Business, type Prisma } from "@mom/db";
 import type { Env } from "@mom/config";
 import { getAIProvider, type BusinessKnowledge } from "../ai";
+import { resolveVertical } from "../verticals/registry";
 
 /**
  * Onboarding & Business Knowledge Profile.
@@ -81,4 +82,101 @@ export function getKnowledge(business: Business): BusinessKnowledge | null {
 
 export function isOnboarded(business: Business): boolean {
   return business.onboardedAt != null;
+}
+
+// --------------------------------------------------------------------------
+// Onboarding — sets the Growth Plan + a locale-aware knowledge profile, no AI
+// call (keeps the demo on-locale). Generic across verticals.
+// --------------------------------------------------------------------------
+
+export interface OnboardInput {
+  businessName?: string;
+  whatWeDo: string;
+  idealCustomer?: string;
+  /** Goal keys; the first is the primary objective. */
+  goals: string[];
+  tone?: string;
+  verticalKey?: string;
+}
+
+function buildKnowledge(
+  locale: string,
+  input: OnboardInput,
+  pillars: string[],
+): BusinessKnowledge {
+  if (locale === "he") {
+    return {
+      summary: `${sentence(input.whatWeDo)}${
+        input.idealCustomer ? ` בדגש על ${input.idealCustomer}.` : "."
+      }`,
+      services: pillars,
+      audience: input.idealCustomer?.trim() || "לקוחות מקומיים",
+      tone: input.tone?.trim() || "מקצועי, חם ואמין",
+      painPoints: [
+        "בלבול מול ריבוי אפשרויות",
+        "חשש מהחלטה כספית שגויה",
+        "חוסר ידע על התהליך",
+      ],
+      topics: pillars,
+      writingStyle: "משפטים ברורים ונגישים, בגוף ראשון, בנימה ידידותית",
+      ctaStyle: "הזמנה עדינה להתייעצות אישית",
+    };
+  }
+  return {
+    summary: `${sentence(input.whatWeDo)}${
+      input.idealCustomer ? ` Focused on ${input.idealCustomer}.` : "."
+    }`,
+    services: pillars,
+    audience: input.idealCustomer?.trim() || "local customers",
+    tone: input.tone?.trim() || "professional, warm, trustworthy",
+    painPoints: [
+      "Overwhelmed by options",
+      "Worried about an expensive mistake",
+      "Unsure how the process works",
+    ],
+    topics: pillars,
+    writingStyle: "clear, jargon-free, first person, friendly",
+    ctaStyle: "a soft invitation to talk",
+  };
+}
+
+function sentence(s: string): string {
+  const t = s.trim().replace(/[.\s]+$/, "");
+  return t.charAt(0).toUpperCase() + t.slice(1) + ".";
+}
+
+/** Complete onboarding: Growth Plan + knowledge + vertical binding. */
+export async function onboardBusiness(
+  businessId: string,
+  input: OnboardInput,
+): Promise<Business> {
+  const vertical = resolveVertical(input.verticalKey);
+  const goalOptions = vertical.content.goals;
+  const chosen = input.goals.length ? input.goals : [goalOptions[0]!.key];
+  const growthGoals = chosen.map(
+    (k) => goalOptions.find((g) => g.key === k) ?? { key: k, label: k },
+  );
+  const knowledge = buildKnowledge(
+    vertical.content.locale,
+    input,
+    vertical.content.pillars.map((p) => p.label),
+  );
+
+  return prisma.business.update({
+    where: { id: businessId },
+    data: {
+      ...(input.businessName?.trim() ? { name: input.businessName.trim() } : {}),
+      verticalKey: vertical.key,
+      description: input.whatWeDo.trim(),
+      targetAudience: input.idealCustomer?.trim() || knowledge.audience,
+      brandTone: input.tone?.trim() || knowledge.tone,
+      goals: chosen,
+      growthPlan: {
+        primary: chosen[0],
+        goals: growthGoals,
+      } as unknown as Prisma.InputJsonValue,
+      knowledge: knowledge as unknown as Prisma.InputJsonValue,
+      onboardedAt: new Date(),
+    },
+  });
 }

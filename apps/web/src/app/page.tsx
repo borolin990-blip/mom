@@ -1,5 +1,9 @@
 import { redirect } from "next/navigation";
+import { getActiveBusiness, isOnboarded } from "@mom/core";
 
-export default function Home() {
-  redirect("/home");
+export const dynamic = "force-dynamic";
+
+export default async function Root() {
+  const business = await getActiveBusiness();
+  redirect(isOnboarded(business) ? "/home" : "/start");
 }

@@ -185,7 +185,14 @@ async function main() {
     verticalKey: "mortgage",
     targetAudience: "זוגות צעירים ומשפחות שרוכשים דירה ראשונה",
     brandTone: "מקצועי, חם ואמין",
-    goals: ["leads"],
+    goals: ["authority", "leads"],
+    growthPlan: {
+      primary: "authority",
+      goals: [
+        { key: "authority", label: "בניית מומחיות ומוניטין" },
+        { key: "leads", label: "יותר פניות" },
+      ],
+    } as unknown as object,
     description:
       "ייעוץ משכנתאות אישי לרוכשי דירה ראשונה ולמחזור משכנתא, בשפה פשוטה וברורה.",
     knowledge: knowledge as unknown as object,

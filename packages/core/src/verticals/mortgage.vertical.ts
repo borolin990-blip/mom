@@ -1,4 +1,5 @@
 import type { Vertical } from "./vertical.interface";
+import { mortgageContent } from "./mortgage.content";
 
 /**
  * Mortgage Advisor — the primary vertical. This module is where the product's
@@ -62,6 +63,8 @@ export const mortgageVertical: Vertical = {
     },
   ],
 
+  content: mortgageContent,
+
   // contributeSuggestions is intentionally omitted for now: real rate/market
-  // signals (the Morning Brief) are built next, inside this module.
+  // signals are built next, inside this module.
 };

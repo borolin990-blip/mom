@@ -5,50 +5,100 @@ import type { Suggestion } from "../marketing/suggestion.types";
 /**
  * The Vertical seam — "build vertically, architect horizontally."
  *
- * A Vertical is the single place ALL niche-specific logic lives: the AI persona
- * and guardrails, the onboarding questions, the north-star metric, and (as we
- * build them) proactive signals, compliance rules, and lead magnets. The
- * generic spine (Business, Content, Post, the AI/storage providers) stays
- * vertical-agnostic and calls into the resolved Vertical.
- *
- * Rule we follow: a capability only graduates from a Vertical into the shared
- * core once a SECOND vertical needs it. Until then, niche depth lives here — not
- * smeared across generic services.
+ * A Vertical is the single place ALL niche logic lives: persona + guardrails,
+ * onboarding questions, the north-star metric, the selectable growth goals, the
+ * content pillars, weekly research substance, and the content seeds the Weekly
+ * Cycle engine composes into a plan. The engine and UI are vertical-agnostic and
+ * read everything through this contract, so a new vertical (real estate,
+ * insurance, legal, accounting…) plugs into the same workflow by adding a module.
  */
 
 export interface OnboardingQuestion {
-  /** Stored key, e.g. "whatWeDo", "nmlsId". */
   key: string;
   label: string;
   placeholder?: string;
   required?: boolean;
   type: "text" | "textarea" | "choice";
   choices?: { value: string; label: string }[];
-  /** Optional helper text shown under the field. */
   hint?: string;
 }
 
-export interface Vertical {
-  /** Stable identifier persisted on Business.verticalKey. */
+/** A selectable growth goal (shown in onboarding, drives the weekly cycle). */
+export interface GoalOption {
   key: string;
-  /** Human label, e.g. "Mortgage Advisor". */
   label: string;
-  /** The north-star this vertical's AI optimizes for, shown in the UI. */
+}
+
+export type ContentRole = "EDUCATIONAL" | "AUTHORITY" | "TRUST" | "CONVERSION";
+export type ContentFormat = "REEL" | "CAROUSEL" | "STATIC";
+export type ContentPlatform =
+  | "INSTAGRAM"
+  | "FACEBOOK"
+  | "TIKTOK"
+  | "LINKEDIN"
+  | "YOUTUBE";
+
+/** A short video script for Reel/TikTok items. */
+export interface VideoScriptSeed {
+  hook: string;
+  beats: string[];
+  onScreenText: string[];
+  cta: string;
+  durationSec: number;
+}
+
+/**
+ * A ready content seed the engine composes into a PlanItem. In V1 these provide
+ * the (Hebrew) substance for the mock/demo path; the same shape is what the AI
+ * pipeline produces when generating dynamically.
+ */
+export interface ContentSeed {
+  topic: string;
+  pillar: string;
+  role: ContentRole;
+  format: ContentFormat;
+  platform: ContentPlatform;
+  goalKey: string;
+  hook: string;
+  caption: string;
+  description?: string;
+  cta: string;
+  hashtags: string[];
+  rationale: string;
+  script?: VideoScriptSeed;
+}
+
+/** A weekly market-research read the plan is built on. */
+export interface WeeklyResearch {
+  summary: string;
+  trends: string[];
+  topics: string[];
+  recommendation: string;
+}
+
+/** The vertical's content substance the generic engine draws from. */
+export interface VerticalContent {
+  /** BCP-47-ish locale, e.g. "he" or "en". */
+  locale: string;
+  goals: GoalOption[];
+  pillars: { key: string; label: string }[];
+  research: WeeklyResearch;
+  seeds: ContentSeed[];
+}
+
+export interface Vertical {
+  key: string;
+  label: string;
   primaryGoalLabel: string;
 
-  /** Persona injected into content prompts (who the AI is writing as). */
   contentPersona: string;
-  /** Extra guardrails/guidance appended to the content system prompt. */
   contentGuidance: string;
 
-  /** Vertical-specific onboarding questions. */
   onboardingQuestions: OnboardingQuestion[];
 
-  /**
-   * Optional: proactive, niche suggestions (e.g. rate-drop → refi post). The
-   * marketing engine merges these with its generic, signal-based suggestions.
-   * Left unimplemented until the underlying data (rates, market) exists.
-   */
+  /** Goals, pillars, weekly research, and content seeds for the engine. */
+  content: VerticalContent;
+
   contributeSuggestions?(input: {
     env: Env;
     business: Business;

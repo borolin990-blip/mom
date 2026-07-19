@@ -4,14 +4,80 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getEnv } from "@mom/config";
 import {
-  completeOnboarding,
+  approveAndScheduleCycle,
+  approvePlanItem,
   createIdeaAsset,
   generateForAsset,
+  generateWeeklyCycle,
   getActiveBusiness,
+  onboardBusiness,
   schedulePost,
 } from "@mom/core";
 
-/** Run (or re-run) the AI content engine for an asset. */
+/** Onboard the active business, then build its first weekly cycle. */
+export async function onboardAction(input: {
+  businessName?: string;
+  whatWeDo: string;
+  idealCustomer?: string;
+  goals: string[];
+}): Promise<{ ok: false; error: string } | never> {
+  try {
+    const business = await getActiveBusiness();
+    const updated = await onboardBusiness(business.id, {
+      businessName: input.businessName,
+      whatWeDo: input.whatWeDo,
+      idealCustomer: input.idealCustomer,
+      goals: input.goals,
+      verticalKey: "mortgage",
+    });
+    await generateWeeklyCycle(updated);
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "אירעה שגיאה בהקמה.",
+    };
+  }
+  revalidatePath("/", "layout");
+  redirect("/home");
+}
+
+/** Approve a single plan item. */
+export async function approveItemAction(
+  itemId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const business = await getActiveBusiness();
+    await approvePlanItem(itemId, business.id);
+    revalidatePath("/home");
+    return { ok: true };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "שגיאה באישור.",
+    };
+  }
+}
+
+/** Approve the whole week and schedule it. */
+export async function approveWeekAction(
+  cycleId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const business = await getActiveBusiness();
+    await approveAndScheduleCycle(cycleId, business.id);
+    revalidatePath("/home");
+    revalidatePath("/calendar");
+    return { ok: true };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "שגיאה בתזמון.",
+    };
+  }
+}
+
+// --- retained from the earlier content flow (existing screens) ---------------
+
 export async function generateAction(
   assetId: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
@@ -21,7 +87,6 @@ export async function generateAction(
     await generateForAsset(env, assetId, business.id);
     revalidatePath(`/content/${assetId}`);
     revalidatePath("/posts");
-    revalidatePath("/create");
     return { ok: true };
   } catch (err) {
     return {
@@ -31,41 +96,6 @@ export async function generateAction(
   }
 }
 
-/** Invisible onboarding: build the Business Knowledge Profile, then go create. */
-export async function onboardingAction(input: {
-  whatWeDo: string;
-  idealCustomer?: string;
-  goal?: string;
-  website?: string;
-  instagram?: string;
-  facebook?: string;
-  linkedin?: string;
-}): Promise<{ ok: false; error: string } | never> {
-  try {
-    const env = getEnv();
-    const business = await getActiveBusiness();
-    await completeOnboarding(env, business.id, {
-      whatWeDo: input.whatWeDo,
-      idealCustomer: input.idealCustomer,
-      goal: input.goal,
-      links: {
-        website: input.website,
-        instagram: input.instagram,
-        facebook: input.facebook,
-        linkedin: input.linkedin,
-      },
-    });
-  } catch (err) {
-    return {
-      ok: false,
-      error: err instanceof Error ? err.message : "Setup failed.",
-    };
-  }
-  revalidatePath("/", "layout");
-  redirect("/create");
-}
-
-/** Turn an idea (typed or from a suggestion) into a full post, then open it. */
 export async function createFromIdeaAction(
   idea: string,
 ): Promise<{ ok: false; error: string } | never> {
@@ -85,7 +115,6 @@ export async function createFromIdeaAction(
   redirect(`/content/${assetId}`);
 }
 
-/** Add a generated post to the calendar (AI-recommended time by default). */
 export async function scheduleAction(input: {
   assetId: string;
   generationId: string;

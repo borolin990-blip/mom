@@ -19,8 +19,8 @@ export default async function AppLayout({
 }) {
   const business = await getActiveBusiness();
 
-  // First-run: send new businesses through the (near-invisible) onboarding.
-  if (!isOnboarded(business)) redirect("/onboarding");
+  // First-run: send new businesses through onboarding.
+  if (!isOnboarded(business)) redirect("/start");
 
   return (
     <div className="flex min-h-screen">

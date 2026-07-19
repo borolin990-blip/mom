@@ -1,73 +1,74 @@
 import { redirect } from "next/navigation";
 import {
+  generateWeeklyCycle,
   getActiveBusiness,
-  getGenerations,
+  getCurrentCycle,
   isOnboarded,
-  listAssets,
-  listScheduledPosts,
+  resolveVerticalForBusiness,
 } from "@mom/core";
-import { HomeExperience, type HomePost } from "@/components/home/HomeExperience";
+import { LumaShell } from "@/components/luma/LumaShell";
+import { ThisWeek, type WeekData, type WeekItem } from "@/components/luma/ThisWeek";
 
 export const dynamic = "force-dynamic";
 
-const PLATFORM_HE: Record<string, string> = {
-  INSTAGRAM: "אינסטגרם",
-  FACEBOOK: "פייסבוק",
-  LINKEDIN: "לינקדאין",
-  TIKTOK: "טיקטוק",
-  YOUTUBE: "יוטיוב",
-};
-
-function whenLabel(date: Date): string {
-  const day = date.toLocaleDateString("he-IL", { weekday: "long" });
-  const time = date.toLocaleTimeString("he-IL", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  return `${day} ${time}`;
+interface GrowthPlan {
+  primary?: string;
+  goals?: { key: string; label: string }[];
 }
 
 export default async function HomePage() {
   const business = await getActiveBusiness();
-  if (!isOnboarded(business)) redirect("/onboarding");
+  if (!isOnboarded(business)) redirect("/start");
 
-  const [assets, scheduled] = await Promise.all([
-    listAssets(business.id),
-    listScheduledPosts(business.id),
-  ]);
+  // Build this week's cycle if it doesn't exist yet.
+  let cycle = await getCurrentCycle(business.id);
+  if (!cycle) cycle = await generateWeeklyCycle(business);
 
-  const generated = assets.filter((a) => a.status === "GENERATED");
-  const schedByAsset = new Map(
-    scheduled
-      .filter((p) => p.assetId && p.scheduledFor)
-      .map((p) => [p.assetId as string, p.scheduledFor as Date]),
-  );
+  const vertical = resolveVerticalForBusiness(business);
+  const growth = (business.growthPlan as GrowthPlan | null) ?? null;
+  const objectiveLabel =
+    growth?.goals?.find((g) => g.key === cycle.objectiveGoal)?.label ??
+    vertical.content.goals.find((g) => g.key === cycle.objectiveGoal)?.label ??
+    "יותר פניות";
 
-  const posts: HomePost[] = [];
-  for (const a of generated.slice(0, 3)) {
-    const gens = await getGenerations(a.id);
-    const primary = gens.find((g) => g.isPrimary) ?? gens[0];
-    const sched = schedByAsset.get(a.id) ?? null;
-    posts.push({
-      id: a.id,
-      title: a.originalName ?? "פוסט",
-      caption: primary?.caption ?? "",
-      platform: PLATFORM_HE[primary?.platformHint ?? "INSTAGRAM"] ?? "אינסטגרם",
-      status: sched ? "scheduled" : "ready",
-      when: sched ? whenLabel(sched) : null,
-    });
-  }
+  const goalLabel = (key: string | null) =>
+    vertical.content.goals.find((g) => g.key === key)?.label ?? "צמיחה";
+
+  const research = (cycle.research as WeekData["research"] | null) ?? {
+    summary: "",
+    trends: [],
+    recommendation: "",
+  };
+
+  const items: WeekItem[] = cycle.items.map((it) => ({
+    id: it.id,
+    role: it.role,
+    format: it.format,
+    platform: it.platform,
+    goalLabel: goalLabel(it.goal),
+    topic: it.topic,
+    hook: it.hook,
+    caption: it.caption,
+    cta: it.cta,
+    hashtags: it.hashtags,
+    rationale: it.rationale ?? "",
+    status: it.status,
+    script: (it.videoScript as WeekItem["script"]) ?? null,
+  }));
+
+  const data: WeekData = {
+    businessName: business.name,
+    firstName: business.name.split(/\s|—/)[0] ?? business.name,
+    isDemo: business.name.includes("נועה"),
+    objectiveLabel,
+    cycleId: cycle.id,
+    research,
+    items,
+  };
 
   return (
-    <HomeExperience
-      data={{
-        firstName: business.name.split(/\s|—/)[0] ?? business.name,
-        businessName: business.name,
-        isDemo: business.name.includes("נועה"),
-        readyCount: generated.length,
-        scheduledCount: scheduled.length,
-        posts,
-      }}
-    />
+    <LumaShell active="home" businessName={business.name}>
+      <ThisWeek data={data} />
+    </LumaShell>
   );
 }
