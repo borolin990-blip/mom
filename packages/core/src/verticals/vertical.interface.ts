@@ -65,7 +65,23 @@ export interface ContentSeed {
   cta: string;
   hashtags: string[];
   rationale: string;
+  /** Recommended visual/creative direction (shown in the Studio). */
+  visualDirection?: string;
+  /** Alternative angles Luma considered — surfaced as rejected candidates. */
+  altIdeas?: string[];
   script?: VideoScriptSeed;
+}
+
+/**
+ * A market event that can reshape (or replace) the week — e.g. a rate drop.
+ * Carries its own research read, strategy, and event-specific seeds.
+ */
+export interface MarketEvent {
+  key: string;
+  label: string;
+  research: WeeklyResearch;
+  strategyNote: string;
+  seeds: ContentSeed[];
 }
 
 /** A weekly market-research read the plan is built on. */
@@ -84,6 +100,8 @@ export interface VerticalContent {
   pillars: { key: string; label: string }[];
   research: WeeklyResearch;
   seeds: ContentSeed[];
+  /** Optional market events that can reshape the week. */
+  events?: MarketEvent[];
 }
 
 export interface Vertical {

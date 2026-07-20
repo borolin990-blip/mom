@@ -95,6 +95,30 @@
 
 .foot { display: flex; align-items: center; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
 .status { font-size: .82rem; font-weight: 700; color: var(--sage); display: inline-flex; align-items: center; gap: 6px; }
+.qscore { font-size: .8rem; font-weight: 700; color: var(--wine-deep); background: var(--wine-tint); border-radius: 999px; padding: 5px 11px; }
+.compok { font-size: .8rem; font-weight: 700; color: var(--sage); display: inline-flex; align-items: center; gap: 5px; }
+
+/* ---- Content Studio ---- */
+.studioBack { font-size: .88rem; font-weight: 700; color: var(--wine); text-decoration: none; }
+.studioSection { margin-top: 18px; }
+.studioSection .l { font-size: .74rem; font-weight: 700; letter-spacing: .1em; color: var(--muted); margin-bottom: 8px; }
+.alt { border-inline-start: 3px solid var(--line-strong); padding: 8px 14px; margin-bottom: 8px; }
+.alt .idea { font-size: .95rem; font-weight: 700; }
+.alt .rej { font-size: .84rem; color: var(--muted); margin-top: 2px; }
+.qbar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.qbar-row .qn { width: 110px; font-size: .84rem; color: var(--ink-soft); flex: none; }
+.qbar { flex: 1; height: 8px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+.qbar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--wine), var(--gold)); }
+.qbar-row .qv { width: 30px; text-align: start; font-weight: 700; font-size: .84rem; color: var(--wine-deep); font-variant-numeric: tabular-nums; }
+.compliance { background: #F1F6F0; border: 1px solid #DDEADC; border-radius: 14px; padding: 14px 16px; }
+.compliance.fail { background: #FBF0EF; border-color: #EBD3D0; }
+.compliance .ch { font-weight: 800; color: var(--sage); display: flex; align-items: center; gap: 8px; }
+.compliance.fail .ch { color: #b23b5e; }
+.compliance ul { margin: 8px 0 0; padding-inline-start: 18px; }
+.compliance li { font-size: .88rem; color: var(--ink-soft); margin-bottom: 3px; }
+.overall { display: inline-flex; align-items: baseline; gap: 8px; }
+.overall .big { font-size: 2.4rem; font-weight: 800; color: var(--wine); }
+.overall .max { font-size: 1rem; color: var(--muted); }
 
 /* buttons */
 .btn { border: 0; cursor: pointer; font-family: inherit; font-weight: 700; font-size: .95rem; border-radius: 13px; padding: 12px 22px; display: inline-flex; align-items: center; gap: 8px; transition: transform .15s, box-shadow .25s, background .2s; text-decoration: none; }

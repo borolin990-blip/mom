@@ -11,6 +11,7 @@ import {
   generateWeeklyCycle,
   getActiveBusiness,
   onboardBusiness,
+  regenerateWeeklyCycle,
   schedulePost,
 } from "@mom/core";
 
@@ -39,6 +40,23 @@ export async function onboardAction(input: {
   }
   revalidatePath("/", "layout");
   redirect("/home");
+}
+
+/** Rebuild this week's plan — optionally reshaped around a market event. */
+export async function regenerateWeekAction(
+  eventKey?: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    const business = await getActiveBusiness();
+    await regenerateWeeklyCycle(business, eventKey ? { eventKey } : {});
+    revalidatePath("/home");
+    return { ok: true };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "שגיאה בבנייה מחדש.",
+    };
+  }
 }
 
 /** Approve a single plan item. */

@@ -1,9 +1,14 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "./luma.module.css";
-import { approveItemAction, approveWeekAction } from "@/app/actions";
+import {
+  approveItemAction,
+  approveWeekAction,
+  regenerateWeekAction,
+} from "@/app/actions";
 
 interface Script {
   hook: string;
@@ -26,6 +31,8 @@ export interface WeekItem {
   rationale: string;
   status: string;
   script: Script | null;
+  quality: number | null;
+  compliancePassed: boolean | null;
 }
 export interface WeekData {
   businessName: string;
@@ -33,6 +40,8 @@ export interface WeekData {
   isDemo: boolean;
   objectiveLabel: string;
   cycleId: string;
+  strategyNote: string | null;
+  marketEvent: string | null;
   research: { summary: string; trends: string[]; recommendation: string };
   items: WeekItem[];
 }
@@ -69,6 +78,13 @@ export function ThisWeek({ data }: { data: WeekData }) {
     });
   }
 
+  function regenerate(eventKey?: string) {
+    start(async () => {
+      await regenerateWeekAction(eventKey);
+      router.refresh();
+    });
+  }
+
   return (
     <div>
       {data.isDemo && (
@@ -100,6 +116,34 @@ export function ThisWeek({ data }: { data: WeekData }) {
             <span key={t} className={styles.trend}>{t}</span>
           ))}
         </div>
+      </div>
+
+      {/* Strategy — why the week is shaped this way (dynamic, not a template) */}
+      {data.strategyNote && (
+        <div className={styles.soft} style={{ marginTop: "14px" }}>
+          <div className={styles.eyebrow} style={{ marginBottom: "6px" }}>
+            {data.marketEvent ? "⚡ שיניתי את התוכנית בעקבות אירוע שוק" : "איך הרכבתי את השבוע"}
+          </div>
+          <p style={{ margin: 0, color: "var(--ink-soft)", lineHeight: 1.6 }}>
+            {data.strategyNote}
+          </p>
+        </div>
+      )}
+
+      {/* Adaptive controls */}
+      <div className={styles.foot} style={{ marginTop: "14px" }}>
+        <button className={cx(styles.btn, styles.secondary, styles.small)} onClick={() => regenerate()} disabled={pending}>
+          ↻ בנה תוכנית אחרת
+        </button>
+        {data.marketEvent ? (
+          <button className={cx(styles.btn, styles.ghost, styles.small)} onClick={() => regenerate()} disabled={pending}>
+            חזרה לתוכנית הרגילה
+          </button>
+        ) : (
+          <button className={cx(styles.btn, styles.secondary, styles.small)} onClick={() => regenerate("rate_drop")} disabled={pending}>
+            ⚡ הדמיית אירוע: ירידת ריבית
+          </button>
+        )}
       </div>
 
       <div className={styles["section-label"]}>התוכנית לאישור · {data.items.length} פריטים</div>
@@ -149,6 +193,15 @@ export function ThisWeek({ data }: { data: WeekData }) {
                   >
                     אישור הפריט
                   </button>
+                )}
+                <Link href={`/studio/${it.id}`} className={cx(styles.btn, styles.ghost, styles.small)}>
+                  הצצה לסטודיו →
+                </Link>
+                {it.quality != null && (
+                  <span className={styles.qscore}>ציון איכות {it.quality}</span>
+                )}
+                {it.compliancePassed && (
+                  <span className={styles.compok}>✓ תקין לפרסום</span>
                 )}
               </div>
             </article>

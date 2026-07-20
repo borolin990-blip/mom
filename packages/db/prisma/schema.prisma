@@ -272,6 +272,8 @@ model WeeklyCycle {
   status        CycleStatus @default(REVIEW)
   objectiveGoal String? // the goal key this week serves
   objectiveNote String? // one line: why this focus
+  strategyNote  String? // why the week is shaped the way it is (dynamic plan)
+  marketEvent   String? // key of a market event that reshaped the week, if any
   // The weekly research/trend read the plan was built on.
   research      Json?
   business      Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
@@ -304,6 +306,9 @@ model PlanItem {
   hashtags     String[]
   goal         String? // the goal this item serves
   rationale    String? // why Luma chose it (shown on approval)
+  // The Content Studio decision record: triggering signal, rejected
+  // alternatives + why, quality score, compliance check, visual direction.
+  decision     Json?
   // For REEL/video items: the generated script (beats, on-screen text, etc.).
   videoScript  Json?
   status       PlanItemStatus @default(DRAFT)

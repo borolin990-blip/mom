@@ -40,21 +40,29 @@ export default async function HomePage() {
     recommendation: "",
   };
 
-  const items: WeekItem[] = cycle.items.map((it) => ({
-    id: it.id,
-    role: it.role,
-    format: it.format,
-    platform: it.platform,
-    goalLabel: goalLabel(it.goal),
-    topic: it.topic,
-    hook: it.hook,
-    caption: it.caption,
-    cta: it.cta,
-    hashtags: it.hashtags,
-    rationale: it.rationale ?? "",
-    status: it.status,
-    script: (it.videoScript as WeekItem["script"]) ?? null,
-  }));
+  const items: WeekItem[] = cycle.items.map((it) => {
+    const decision = (it.decision as {
+      quality?: { overall: number };
+      compliance?: { passed: boolean };
+    } | null) ?? null;
+    return {
+      id: it.id,
+      role: it.role,
+      format: it.format,
+      platform: it.platform,
+      goalLabel: goalLabel(it.goal),
+      topic: it.topic,
+      hook: it.hook,
+      caption: it.caption,
+      cta: it.cta,
+      hashtags: it.hashtags,
+      rationale: it.rationale ?? "",
+      status: it.status,
+      script: (it.videoScript as WeekItem["script"]) ?? null,
+      quality: decision?.quality?.overall ?? null,
+      compliancePassed: decision?.compliance?.passed ?? null,
+    };
+  });
 
   const data: WeekData = {
     businessName: business.name,
@@ -62,6 +70,8 @@ export default async function HomePage() {
     isDemo: business.name.includes("נועה"),
     objectiveLabel,
     cycleId: cycle.id,
+    strategyNote: cycle.strategyNote,
+    marketEvent: cycle.marketEvent,
     research,
     items,
   };
